@@ -71,7 +71,7 @@ def register_blueprints(app):
     from app.tasks import tasks_bp
     from app.categories import categories_bp
     from flask import redirect, url_for
-    from flask_login import current_user
+    from flask_login import current_user, login_required
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -85,3 +85,14 @@ def register_blueprints(app):
         if current_user.is_authenticated:
             return redirect(url_for('tasks.list_tasks'))
         return redirect(url_for('auth.login'))
+    
+    # Ruta dashboard protegida
+    @app.route('/dashboard')
+    @login_required
+    def dashboard():
+        """
+        Panel de control protegido del usuario.
+        Requiere autenticación via @login_required decorator.
+        Redirige automáticamente al login si el usuario no está autenticado.
+        """
+        return redirect(url_for('tasks.list_tasks'))

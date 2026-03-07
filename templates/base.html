@@ -34,7 +34,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('auth.login') }}">
+            <a class="navbar-brand fw-bold" href="{% if current_user.is_authenticated %}{{ url_for('tasks.list_tasks') }}{% else %}{{ url_for('auth.login') }}{% endif %}">
                 <i class="bi bi-check2-square"></i> TaskApp
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -43,13 +43,25 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
+                        <!-- Rutas para usuarios autenticados -->
                         <li class="nav-item">
-                            <a class="nav-link" href="#">{{ current_user.username }}</a>
+                            <a class="nav-link" href="{{ url_for('tasks.list_tasks') }}">📋 Mis Tareas</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a>
+                            <a class="nav-link" href="{{ url_for('users.user_profile', user_id=current_user.id) }}">👤 Perfil</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('users.user_profile', user_id=current_user.id) }}">Mi Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a></li>
+                            </ul>
                         </li>
                     {% else %}
+                        <!-- Rutas para usuarios no autenticados -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}">Iniciar Sesión</a>
                         </li>
