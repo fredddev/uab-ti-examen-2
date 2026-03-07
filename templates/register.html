@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse - TaskApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4 text-primary fw-bold">
+                    <i class="bi bi-person-plus"></i> Registrarse
+                </h2>
+
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label fw-bold") }}
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username() }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label fw-bold") }}
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.email.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email() }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label fw-bold") }}
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password() }}
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            <i class="bi bi-info-circle"></i> Mínimo 6 caracteres
+                        </small>
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div class="mb-4">
+                        {{ form.confirm_password.label(class="form-label fw-bold") }}
+                        {% if form.confirm_password.errors %}
+                            {{ form.confirm_password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.confirm_password.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.confirm_password() }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    {{ form.submit() }}
+                </form>
+
+                <!-- Login Link -->
+                <hr class="my-4">
+                <p class="text-center text-muted mb-0">
+                    ¿Ya tienes cuenta? 
+                    <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold text-primary">
+                        Inicia sesión aquí
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}

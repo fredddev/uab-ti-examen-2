@@ -48,6 +48,9 @@ class TestingConfig(Config):
     """Configuración para pruebas."""
     DEBUG = True
     TESTING = True
+    # Usar SQLite en memoria para pruebas
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_ENGINE_OPTIONS = {}  # SQLite no necesita estas opciones
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 

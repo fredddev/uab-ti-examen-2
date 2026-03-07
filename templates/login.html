@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - TaskApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4 text-primary fw-bold">
+                    <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                </h2>
+
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label fw-bold") }}
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username() }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-4">
+                        {{ form.password.label(class="form-label fw-bold") }}
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password() }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    {{ form.submit() }}
+                </form>
+
+                <!-- Register Link -->
+                <hr class="my-4">
+                <p class="text-center text-muted mb-0">
+                    ¿No tienes cuenta? 
+                    <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-bold text-primary">
+                        Regístrate aquí
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
