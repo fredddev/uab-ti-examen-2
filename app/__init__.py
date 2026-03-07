@@ -70,8 +70,18 @@ def register_blueprints(app):
     from app.users import users_bp
     from app.tasks import tasks_bp
     from app.categories import categories_bp
+    from flask import redirect, url_for
+    from flask_login import current_user
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(categories_bp)
+    
+    # Ruta raíz que redirige al login o al dashboard
+    @app.route('/')
+    def index():
+        """Ruta raíz que redirige al login si no está autenticado, o al dashboard si lo está."""
+        if current_user.is_authenticated:
+            return redirect(url_for('tasks.list_tasks'))
+        return redirect(url_for('auth.login'))
