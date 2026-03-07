@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
 from app.config import config
 import os
 
@@ -10,6 +11,7 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
+csrf = CSRFProtect()
 
 
 def create_app(config_name=None):
@@ -27,20 +29,38 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'development')
     
-    app = Flask(__name__)
+    # Determinar la ruta del directorio raíz del proyecto
+    root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    template_folder = os.path.join(root_path, 'templates')
+    
+    app = Flask(__name__, template_folder=template_folder)
     app.config.from_object(config[config_name])
     
     # Inicializar extensiones con la app
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor inicia sesión para acceder a esta página.'
     
     # Registrar blueprints
     register_blueprints(app)
     
+    # Registrar user_loader para Flask-Login
+    setup_user_loader(app)
+    
     return app
+
+
+def setup_user_loader(app):
+    """Configura el user_loader callback para Flask-Login."""
+    from app.models import User
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Carga un usuario por su ID."""
+        return User.query.get(int(user_id))
 
 
 def register_blueprints(app):
