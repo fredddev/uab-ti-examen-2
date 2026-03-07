@@ -40,10 +40,6 @@ def create_app(config_name=None):
     # Registrar blueprints
     register_blueprints(app)
     
-    # Crear tablas de base de datos
-    with app.app_context():
-        db.create_all()
-    
     return app
 
 
