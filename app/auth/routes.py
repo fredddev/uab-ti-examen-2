@@ -7,6 +7,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.models import User
 from app.auth.forms import RegistrationForm, LoginForm
+from app.auth.decorators import require_admin
 
 
 # Crear el blueprint
@@ -89,3 +90,27 @@ def logout():
     logout_user()
     flash('Has cerrado sesión exitosamente.', 'info')
     return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/admin')
+@require_admin
+def admin_panel():
+    """
+    Panel de administración - solo accesible para usuarios con rol 'admin'.
+    
+    Esta ruta demuestra cómo usar el decorator @require_admin para proteger vistas.
+    """
+    # Obtener estadísticas de usuarios
+    total_users = User.query.count()
+    admin_users = User.query.filter_by(role='admin').count()
+    regular_users = User.query.filter_by(role='user').count()
+    
+    users_list = User.query.all()
+    
+    return render_template(
+        'admin_panel.html',
+        total_users=total_users,
+        admin_users=admin_users,
+        regular_users=regular_users,
+        users_list=users_list
+    )

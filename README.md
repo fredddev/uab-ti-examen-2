@@ -1,157 +1,189 @@
-# Flask Task Manager
+# TaskApp - Gestor de Tareas
 
-Aplicación web para gestionar tareas usando Flask con buenas prácticas de arquitectura.
+Una aplicación web simple para gestionar tareas del día a día.
 
-## Estructura del Proyecto
+---
 
-```
-project/
-├── app/
-│   ├── __init__.py          # Factory function create_app()
-│   ├── config.py            # Configuración de la aplicación
-│   ├── models/
-│   │   └── __init__.py      # Modelos de BD (User, Category, Task)
-│   ├── auth/
-│   │   └── __init__.py      # Blueprint de autenticación
-│   ├── users/
-│   │   └── __init__.py      # Blueprint de usuarios
-│   ├── tasks/
-│   │   └── __init__.py      # Blueprint de tareas
-│   ├── categories/
-│   │   └── __init__.py      # Blueprint de categorías
-│   ├── templates/           # Templates HTML
-│   └── static/              # Archivos estáticos (CSS, JS, imágenes)
-├── migrations/              # Migraciones de base de datos (Flask-Migrate)
-├── run.py                   # Punto de entrada de la aplicación
-├── requirements.txt         # Dependencias de Python
-└── .gitignore              # Archivo de gitignore
-```
+## 🚀 Cómo Levantar la Aplicación (Primera Vez)
 
-## Características
+### Paso 1: Instalar Dependencias
 
-- ✅ **Arquitectura modular**: Uso de blueprints para organizar funcionalidades
-- ✅ **Factory Pattern**: Función `create_app()` para inicializar la aplicación
-- ✅ **Gestión de BD**: Flask-SQLAlchemy para ORM
-- ✅ **Migraciones**: Flask-Migrate para control de versiones de BD
-- ✅ **Autenticación**: Flask-Login para sesiones de usuario
-- ✅ **Configuración flexible**: Diferentes configs para dev, producción y tests
-- ✅ **Modelos predefinidos**: User, Category, Task
-
-## Requisitos Previos
-
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
-
-## Instalación
-
-1. **Instalar dependencias**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Crear archivo .env (opcional)**
-   ```
-   FLASK_ENV=development
-   FLASK_DEBUG=True
-   SECRET_KEY=tu-clave-secreta-aqui
-   DATABASE_URL=sqlite:///app.db
-   ```
-
-## Uso
-
-### Ejecutar la aplicación
+Abre PowerShell en la carpeta del proyecto y ejecuta:
 
 ```bash
-python run.py
+pip install -r requirements.txt
 ```
 
-La aplicación estará disponible en `http://127.0.0.1:5001`
+> ⏱️ Esto puede tomar unos 2-3 minutos la primera vez.
 
-### Inicializar migraciones
+---
 
-```bash
-flask db init
+### Paso 2: Configurar la Base de Datos
+
+#### Si es la PRIMERA VEZ:
+
+1. Abre el archivo `.env` en la carpeta principal
+2. Busca la línea `DB_PASSWORD=`
+3. Cambia `123456` por la contraseña de tu MySQL
+
+**Ejemplo:**
+```env
+DB_USER=root
+DB_PASSWORD=tu_password_aqui  ← Cambia esto
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=db_tareas_uab
 ```
 
-### Crear una migración
+4. Guarda el archivo
 
-```bash
-flask db migrate -m "Descripción del cambio"
-```
+---
 
-### Aplicar migraciones
+### Paso 3: Inicializar la Base de Datos
+
+En PowerShell, ejecuta:
 
 ```bash
 flask db upgrade
 ```
 
-### Flask Shell
-
-Para interactuar con la aplicación en una shell:
-
-```bash
-flask shell
-```
-
-## Modelos de Base de Datos
-
-### User
-- id (Integer, PK)
-- username (String, unique)
-- email (String, unique)
-- password (String)
-- created_at (DateTime)
-- updated_at (DateTime)
-
-### Category
-- id (Integer, PK)
-- name (String)
-- description (Text)
-- user_id (FK)
-- created_at (DateTime)
-
-### Task
-- id (Integer, PK)
-- title (String)
-- description (Text)
-- completed (Boolean)
-- due_date (DateTime)
-- priority (String: low, medium, high)
-- user_id (FK)
-- category_id (FK)
-- created_at (DateTime)
-- updated_at (DateTime)
-
-## Próximos Pasos
-
-1. **Implementar rutas**: Completar las funciones en cada blueprint
-2. **Templates HTML**: Crear templates en `app/templates/`
-3. **Estilos CSS**: Agregar estilos en `app/static/css/`
-4. **Autenticación**: Implementar login y registro con Flask-Login
-5. **Validación**: Usar WTForms para validación de formularios
-6. **API REST**: Convertir a API REST con JSONs
-
-## Variables de Entorno
-
-- `FLASK_ENV`: development, production, testing (default: development)
-- `FLASK_DEBUG`: True/False para activar modo debug (default: True)
-- `FLASK_HOST`: Host donde correr la app (default: 127.0.0.1)
-- `FLASK_PORT`: Puerto donde correr la app (default: 5000)
-- `SECRET_KEY`: Clave secreta para sesiones (default: dev-secret-key)
-- `DATABASE_URL`: URL de conexión a BD (default: sqlite:///app.db)
-
-## Soporte de Tecnologías
-
-- **Flask 2.3.3**: Framework web micro
-- **Flask-SQLAlchemy 3.0.5**: ORM para gestión de BD
-- **Flask-Migrate 4.0.5**: Control de versiones de esquema BD
-- **Flask-Login 0.6.2**: Gestión de autenticación y sesiones
-- **python-dotenv 1.0.0**: Gestión de variables de entorno
-
-## Licencia
-
-Este proyecto es de código abierto y está disponible bajo licencia MIT.
+> Esto crea las tablas necesarias y los usuarios de prueba automáticamente.
 
 ---
 
-**Nota**: Recuerda cambiar la `SECRET_KEY` en producción y configurar `SESSION_COOKIE_SECURE = True` cuando uses HTTPS.
+### Paso 4: Ejecutar la Aplicación
+
+En PowerShell, ejecuta:
+
+```bash
+python run.py
+```
+
+Deberías ver algo como:
+```
+ * Running on http://127.0.0.1:5001
+```
+
+---
+
+## 🌐 Acceder a la Aplicación
+
+Abre tu navegador y ve a:
+
+```
+http://localhost:5001
+```
+
+> Si ves un error de conexión, asegúrate que MySQL está corriendo.
+
+---
+
+## 👤 Usuarios y Contraseñas
+
+La aplicación viene con 2 usuarios de prueba listos para usar:
+
+### Usuario Administrador
+```
+👤 Usuario: admin
+🔐 Contraseña: admin123
+⚙️ Acceso: Panel de Administración + Todas las funciones
+```
+
+### Usuario Normal
+```
+👤 Usuario: user
+🔐 Contraseña: user123456
+📋 Acceso: Dashboard de tareas + Funciones básicas
+```
+
+---
+
+## 🎯 Qué Puedes Hacer
+
+### Con usuario "admin":
+- ✅ Ver panel de administración
+- ✅ Listar todos los usuarios
+- ✅ Gestionar tareas
+- ✅ Crear categorías
+
+### Con usuario "user":
+- ✅ Crear y gestionar tus tareas
+- ✅ Ver tu perfil
+- ✅ Crear categorías
+
+---
+
+## 📍 Rutas Principales
+
+| Ruta | Descripción |
+|------|-------------|
+| `http://localhost:5001` | Página de inicio |
+| `http://localhost:5001/auth/login` | Iniciar sesión |
+| `http://localhost:5001/auth/register` | Registrar nueva cuenta |
+| `http://localhost:5001/auth/admin` | Panel de administración (solo admin) |
+| `http://localhost:5001/tasks` | Mis tareas |
+| `http://localhost:5001/profile` | Mi perfil |
+
+---
+
+## 🆘 Soluciona Problemas
+
+### "No se puede conectar a la base de datos"
+- ✓ Verifica que MySQL está corriendo
+- ✓ Verifica el archivo `.env` con los datos correctos
+- ✓ Asegúrate que la base de datos `db_tareas_uab` existe
+
+### "Error: No se encuentra flask"
+- ✓ Ejecuta `pip install -r requirements.txt` nuevamente
+
+### "Puerto 5001 ya está en uso"
+- ✓ Cierra la aplicación anterior o cambia el puerto en `.env`
+
+---
+
+## 📂 Estructura de Carpetas
+
+```
+project/
+├── app/                 # Código principal de la app
+├── templates/           # Páginas HTML
+├── migrations/          # Base de datos
+├── run.py              # Archivo para iniciar la app
+├── requirements.txt    # Dependencias necesarias
+├── .env                # Configuración (edita esto)
+└── README.md           # Este archivo
+```
+
+---
+
+## 💾 Cambiar la Contraseña de los Usuarios de Prueba
+
+Si quieres cambiar las contraseñas, abre PowerShell en la carpeta del proyecto:
+
+```bash
+python manage_roles.py set <usuario> admin
+```
+
+---
+
+## ✅ Checklist Rápido
+
+- [ ] Python 3.8+ instalado
+- [ ] Archivo `.env` configurado con credenciales de MySQL
+- [ ] MySQL corriendo
+- [ ] `pip install -r requirements.txt` ejecutado
+- [ ] `flask db upgrade` ejecutado
+- [ ] `python run.py` corriendo
+- [ ] Navegador abierto en `http://localhost:5001`
+
+---
+
+## 📞 ¿Necesitas Ayuda?
+
+1. Verifica que seguiste todos los pasos en orden
+2. Mira el archivo `ROLES_IMPLEMENTATION.md` para info sobre roles
+3. Revisa el archivo `ADMIN_PANEL_GUIDE.md` para el panel admin
+
+---
+
+**¡Listo! Ahora puedes gestionar tus tareas. Disfruta la app! 🎉**
