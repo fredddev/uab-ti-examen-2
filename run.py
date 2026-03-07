@@ -1,9 +1,11 @@
 import os
-from app import create_app, db
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde .env
+# PRIMERO: Cargar variables de entorno
 load_dotenv()
+
+# SEGUNDO: Importar la app
+from app import create_app, db
 
 # Crear la aplicación
 app = create_app(os.environ.get('FLASK_ENV', 'development'))
