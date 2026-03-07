@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-# PRIMERO: Cargar variables de entorno
-load_dotenv()
+# PRIMERO: Cargar variables de entorno (recargar cada vez)
+load_dotenv(override=True)
 
 # SEGUNDO: Importar la app
 from app import create_app, db
