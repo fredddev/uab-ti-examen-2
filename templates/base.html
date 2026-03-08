@@ -47,6 +47,14 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('tasks.list_tasks') }}">📋 Mis Tareas</a>
                         </li>
+
+                        <!-- NUEVA OPCIÓN CATEGORÍAS -->
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('categories.list_categories_html') }}">📂 Categorías</a>
+                            </li>
+                        {% endif %}
+
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('users.user_profile', user_id=current_user.id) }}">👤 Perfil</a>
                         </li>

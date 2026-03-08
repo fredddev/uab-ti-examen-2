@@ -49,3 +49,12 @@ def create_category_api():
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
+
+@categories_bp.route("/", methods=["GET"])
+@login_required
+def list_categories_html():
+    """Lista todas las categorías del usuario actual."""
+    # Traer todas las categorías del usuario
+    categories = Category.query.filter_by(user_id=current_user.id).all()
+
+    return render_template("categories/list.html", categories=categories)
