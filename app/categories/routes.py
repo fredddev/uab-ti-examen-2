@@ -30,36 +30,28 @@ def create_category_form_html():
 
     return render_template("categories/create.html", form=form)
 
-
-# --- API JSON (POST, PUT, DELETE) ---
-@categories_bp.route("/create", methods=["POST"])
-@login_required
-def create_category_api():
-    data = request.get_json()
-    if not data or not data.get("name"):
-        return {"error": "El nombre de la categoría es requerido"}, 400
-    try:
-        category = Category(
-            name=data.get("name"),
-            description=data.get("description", ""),
-            user_id=current_user.id
-        )
-        db.session.add(category)
-        db.session.commit()
-        return {"message": "Category created", "data": category.to_dict()}, 201
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 500
-
+# --- LISTADO HTML ---
 @categories_bp.route("/", methods=["GET"])
 @login_required
 def list_categories_html():
-    """Lista todas las categorías del usuario actual."""
-    # Traer todas las categorías del usuario
-    categories = Category.query.filter_by(user_id=current_user.id).all()
+    """Lista todas las categorías del usuario actual, con búsqueda opcional."""
+    query = request.args.get("q", "").strip()
     form = EmptyForm()
-    return render_template("categories/list.html", categories=categories, form=form)
 
+    if query:
+        # Filtrar categorías del usuario según la búsqueda en el nombre
+        categories = Category.query.filter(
+            Category.user_id == current_user.id,
+            Category.name.ilike(f"%{query}%")
+        ).all()
+    else:
+        # Mostrar todas las categorías si no hay búsqueda
+        categories = Category.query.filter_by(user_id=current_user.id).all()
+
+    return render_template("categories/list.html", categories=categories, form=form, query=query)
+
+
+# --- FORMULARIO EDITAR ---
 @categories_bp.route("/edit/<int:category_id>", methods=["GET", "POST"])
 @login_required
 def edit_category(category_id):
@@ -87,6 +79,7 @@ def edit_category(category_id):
 
     return render_template("categories/edit.html", form=form, category=category)
 
+# --- ELIMINAR ---
 @categories_bp.route('/<int:category_id>/delete', methods=['POST'])
 @login_required
 def delete_category_html(category_id):

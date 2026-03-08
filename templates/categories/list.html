@@ -4,10 +4,24 @@
 <div class="container mt-4">
     <h2>Listado de Categorías</h2>
     
+    <!-- Botón para crear nueva categoría -->
     <a href="{{ url_for('categories.create_category_form_html') }}" class="btn btn-success mb-3">
         Crear Nueva Categoría
     </a>
 
+    <!-- Form de búsqueda -->
+    <form method="GET" action="{{ url_for('categories.list_categories_html') }}" class="mb-3 d-flex">
+        <input 
+            type="text" 
+            name="q" 
+            value="{{ query or '' }}" 
+            class="form-control me-2" 
+            placeholder="Buscar categoría..."
+        >
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    <!-- Tabla de categorías -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -25,12 +39,14 @@
                 <td>{{ category.description }}</td>
                 <td>
                     <a href="{{ url_for('categories.edit_category', category_id=category.id) }}" class="btn btn-primary btn-sm">Editar</a>
-                    <!-- Form para eliminar -->
-                    <form method="POST" action="{{ url_for('categories.delete_category_html', category_id=category.id) }}" style="display:inline;" onsubmit="return confirm('¿Deseas eliminar esta categoría?');">
+                    
+                    <!-- Form para eliminar, con CSRF oculto -->
+                    <form method="POST" action="{{ url_for('categories.delete_category_html', category_id=category.id) }}" 
+                          style="display:inline;" 
+                          onsubmit="return confirm('¿Deseas eliminar esta categoría?');">
                         {{ form.hidden_tag() }}
                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                     </form>
-
                 </td>
             </tr>
             {% else %}
