@@ -58,3 +58,30 @@ def list_categories_html():
     categories = Category.query.filter_by(user_id=current_user.id).all()
 
     return render_template("categories/list.html", categories=categories)
+
+@categories_bp.route("/edit/<int:category_id>", methods=["GET", "POST"])
+@login_required
+def edit_category(category_id):
+    """Editar una categoría existente (solo admin)."""
+    # Verificar que el usuario sea administrador
+    if current_user.role != "admin":
+        flash("No tienes permisos para editar categorías.", "danger")
+        return redirect(url_for("categories.list_categories_html"))
+
+    # Buscar la categoría
+    category = Category.query.get_or_404(category_id)
+
+    form = CategoryForm(obj=category)  # Cargar datos actuales
+
+    if form.validate_on_submit():
+        category.name = form.name.data
+        category.description = form.description.data
+        try:
+            db.session.commit()
+            flash("Categoría actualizada exitosamente.", "success")
+            return redirect(url_for("categories.list_categories_html"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al actualizar la categoría: {str(e)}", "danger")
+
+    return render_template("categories/edit.html", form=form, category=category)
