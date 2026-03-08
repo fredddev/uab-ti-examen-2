@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from .forms import CategoryForm
 from app.models.category import Category
+from app.categories.forms import EmptyForm
 from app import db
 
 categories_bp = Blueprint('categories', __name__, url_prefix='/categories')
@@ -25,7 +26,7 @@ def create_category_form_html():
         db.session.add(category)
         db.session.commit()
         flash("Categoría creada exitosamente.", "success")
-        return redirect(url_for("dashboard"))  # temporal
+        return redirect(url_for("categories.list_categories_html"))  # temporal
 
     return render_template("categories/create.html", form=form)
 
@@ -56,8 +57,8 @@ def list_categories_html():
     """Lista todas las categorías del usuario actual."""
     # Traer todas las categorías del usuario
     categories = Category.query.filter_by(user_id=current_user.id).all()
-
-    return render_template("categories/list.html", categories=categories)
+    form = EmptyForm()
+    return render_template("categories/list.html", categories=categories, form=form)
 
 @categories_bp.route("/edit/<int:category_id>", methods=["GET", "POST"])
 @login_required
@@ -85,3 +86,22 @@ def edit_category(category_id):
             flash(f"Error al actualizar la categoría: {str(e)}", "danger")
 
     return render_template("categories/edit.html", form=form, category=category)
+
+@categories_bp.route('/<int:category_id>/delete', methods=['POST'])
+@login_required
+def delete_category_html(category_id):
+    """Elimina una categoría. Solo admins."""
+    if current_user.role != "admin":
+        flash("No tienes permisos para eliminar categorías.", "danger")
+        return redirect(url_for('categories.list_categories_html'))
+
+    category = Category.query.get_or_404(category_id)
+    try:
+        db.session.delete(category)
+        db.session.commit()
+        flash(f"Categoría '{category.name}' eliminada exitosamente.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ocurrió un error al eliminar la categoría: {str(e)}", "danger")
+
+    return redirect(url_for('categories.list_categories_html'))
