@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
 from app.models import Category
+from .routes import categories_bp
 
-categories_bp = Blueprint('categories', __name__, url_prefix='/categories')
 
 
 @categories_bp.route('/')
@@ -27,9 +27,9 @@ def get_category(category_id):
     return {'message': f'Category {category_id}', 'data': category.to_dict()}, 200
 
 
-@categories_bp.route('/create', methods=['POST'])
+@categories_bp.route("/create", methods=["GET", "POST"])
 @login_required
-def create_category():
+def create_category_form():
     """Crea una nueva categoría."""
     data = request.get_json()
     name = data.get('name')
