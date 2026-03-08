@@ -187,3 +187,61 @@ python manage_roles.py set <usuario> admin
 ---
 
 **¡Listo! Ahora puedes gestionar tus tareas. Disfruta la app! 🎉**
+
+🏷️ Módulo Categorías
+
+Gestiona todas las categorías de tus tareas, desde la creación hasta la búsqueda, con control de permisos según el tipo de usuario.
+
+🚀 Funcionalidades Implementadas
+
+➕ Crear Categoría
+
+Solo administradores pueden crear.
+
+Formulario con validación: nombre obligatorio y descripción opcional.
+
+Redirige automáticamente a la lista al guardar.
+
+📝 Editar Categoría
+
+Administradores pueden actualizar nombre y descripción.
+
+Los campos no modificados permanecen intactos.
+
+Redirección a la lista tras guardar.
+
+🗑️ Eliminar Categoría
+
+Confirmación de eliminación para evitar errores.
+
+Solo administradores pueden eliminar.
+
+🔍 Buscar Categoría
+
+Campo de búsqueda por nombre.
+
+Filtrado dinámico usando SQLAlchemy (ilike).
+
+Resultados se muestran directamente en la tabla.
+
+📋 Listado de Categorías
+
+Tabla con ID, nombre, descripción y acciones.
+
+Botones de editar y eliminar para cada categoría.
+
+Integración con Bootstrap 5 para un diseño limpio y responsive.
+
+🛠️ Lo que aprendimos
+
+✅ Crear un módulo CRUD completo en Flask.
+
+✅ Control de permisos basado en roles (admin vs usuario normal).
+
+✅ Formularios con CSRF seguro y dinámico.
+
+✅ Búsqueda y filtrado eficiente con SQLAlchemy.
+
+✅ Plantillas limpias y responsive usando Jinja2 y Bootstrap.
+
+✅ UX consistente: redirecciones y confirmaciones que guían al usuario.
