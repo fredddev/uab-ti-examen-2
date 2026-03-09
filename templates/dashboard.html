@@ -120,6 +120,9 @@
                                 </button>
                                 <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}"
                                     style="display:inline;">
+
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                     <button type="submit" class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('¿Estás seguro de eliminar esta tarea?')">
                                         Eliminar
