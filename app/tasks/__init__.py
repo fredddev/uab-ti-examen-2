@@ -9,7 +9,7 @@ tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 @tasks_bp.route('/')
 @login_required
 def list_tasks():
-    """Lista tareas con filtros opcionales."""
+    """Lista tareas con filtros opcionales"""
 
     status_filter = request.args.get('status')
     category_filter = request.args.get('category')
