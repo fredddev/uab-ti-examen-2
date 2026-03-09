@@ -131,3 +131,51 @@ def delete_task(task_id):
         print(f'Error: {str(e)}')
     
     return redirect(url_for('tasks.list_tasks'))
+
+from flask import send_file
+import openpyxl
+from io import BytesIO
+
+@tasks_bp.route('/export')
+@login_required
+def export_tasks():
+
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+
+    # Crear archivo Excel
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "Tareas"
+
+    # Encabezados
+    sheet.append([
+        "Title",
+        "Description",
+        "Status",
+        "Category",
+        "User"
+    ])
+
+    # Datos
+    for task in tasks:
+        category_name = task.category.name if task.category else "Sin categoría"
+
+        sheet.append([
+            task.title,
+            task.description,
+            task.status,
+            category_name,
+            current_user.username
+        ])
+
+    # Guardar en memoria
+    file_stream = BytesIO()
+    workbook.save(file_stream)
+    file_stream.seek(0)
+
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name="tareas.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
