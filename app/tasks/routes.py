@@ -40,3 +40,26 @@ def create_task():
     flash('Tarea creada correctamente', 'success')
 
     return redirect(url_for('tasks.list_tasks'))
+
+
+@tasks_bp.route('/tasks/<int:task_id>/edit', methods=['POST'])
+@login_required
+def edit_task(task_id):
+
+    task = Task.query.get_or_404(task_id)
+
+    # Seguridad: verificar que la tarea pertenece al usuario
+    if task.user_id != current_user.id:
+        flash('No tienes permiso para editar esta tarea', 'danger')
+        return redirect(url_for('tasks.list_tasks'))
+
+    task.title = request.form.get('title')
+    task.description = request.form.get('description')
+    task.status = request.form.get('status')
+    task.category_id = request.form.get('category_id')
+
+    db.session.commit()
+
+    flash('Tarea actualizada correctamente', 'success')
+
+    return redirect(url_for('tasks.list_tasks'))
