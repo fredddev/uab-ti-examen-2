@@ -12,9 +12,16 @@
                     <h1 class="mb-2">📋 Mis Tareas</h1>
                     <p class="text-muted">Bienvenido, <strong>{{ current_user.username }}</strong></p>
                 </div>
-                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                    + Nueva Tarea
-                </button>
+                <div>
+                    <a href="{{ url_for('tasks.export_tasks') }}" class="btn btn-success me-2">
+                        Exportar Excel
+                    </a>
+
+                    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                        + Nueva Tarea
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -57,85 +64,118 @@
 
     <!-- Mensajes Flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
     <!-- Lista de Tareas -->
     <div class="card shadow">
         <div class="card-header bg-light">
             <h5 class="mb-0">Tus Tareas</h5>
+            <form method="GET" class="row g-2">
+
+                <div class="col-md-4">
+                    <select class="form-select" name="status">
+                        <option value="todos">Todos los estados</option>
+                        <option value="pendiente">Pendiente. </option>
+                        <option value="en_progreso">En progreso.</option>
+                        <option value="completado">Completado.</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <select class="form-select" name="category">
+                        <option value="todas">Todas las categorías</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        Filtrar
+                    </button>
+                </div>
+
+            </form>
         </div>
         <div class="card-body">
             {% if tasks %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Tarea</th>
-                                <th>Descripción</th>
-                                <th>Categoría</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for task in tasks %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ task.title }}</strong>
-                                    </td>
-                                    <td>
-                                        <span class="text-muted">{{ task.description[:50] }}{% if task.description|length > 50 %}...{% endif %}</span>
-                                    </td>
-                                    <td>
-                                        {% if task.category %}
-                                            <span class="badge bg-secondary">{{ task.category.name }}</span>
-                                        {% else %}
-                                            <span class="badge bg-light text-dark">Sin categoría</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if task.status == 'completado' %}
-                                            <span class="badge bg-success">✓ Completada</span>
-                                        {% elif task.status == 'en_progreso' %}
-                                            <span class="badge bg-info">⚙️ En Progreso</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">⏳ Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#editTaskModal" 
-                                                onclick="loadTaskData({{ task.id }})">
-                                            Editar
-                                        </button>
-                                        <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar esta tarea?')">
-                                                Eliminar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarea</th>
+                            <th>Descripción</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>
+                                <strong>{{ task.title }}</strong>
+                            </td>
+                            <td>
+                                <span class="text-muted">{{ task.description[:50] }}{% if task.description|length > 50
+                                    %}...{% endif %}</span>
+                            </td>
+                            <td>
+                                {% if task.category %}
+                                <span class="badge bg-secondary">{{ task.category.name }}</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">Sin categoría</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.status == 'completado' %}
+                                <span class="badge bg-success">✓ Completada</span>
+                                {% elif task.status == 'en_progreso' %}
+                                <span class="badge bg-info">⚙️ En Progreso</span>
+                                {% else %}
+                                <span class="badge bg-warning">⏳ Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#editTaskModal" data-id="{{ task.id }}"
+                                    data-title="{{ task.title }}" data-description="{{ task.description }}"
+                                    data-status="{{ task.status }}">
+                                    Editar
+                                </button>
+                                <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}"
+                                    style="display:inline;">
+
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('¿Estás seguro de eliminar esta tarea?')">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-                <div class="text-center py-5">
-                    <h5 class="text-muted">📭 No tienes tareas aún</h5>
-                    <p class="text-muted mb-3">Crea tu primera tarea para comenzar a organizar tu trabajo</p>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                        + Crear tu primera tarea
-                    </button>
-                </div>
+            <div class="text-center py-5">
+                <h5 class="text-muted">📭 No tienes tareas aún</h5>
+                <p class="text-muted mb-3">Crea tu primera tarea para comenzar a organizar tu trabajo</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                    + Crear tu primera tarea
+                </button>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -150,21 +190,24 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{{ url_for('tasks.create_task') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Título <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="title" required placeholder="Ingresa el título de la tarea">
+                        <input type="text" class="form-control" name="title" required
+                            placeholder="Ingresa el título de la tarea">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea class="form-control" name="description" rows="3" placeholder="Describe tu tarea (opcional)"></textarea>
+                        <textarea class="form-control" name="description" rows="3"
+                            placeholder="Describe tu tarea (opcional)"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
                         <select class="form-select" name="category_id">
                             <option value="">- Sin categoría -</option>
                             {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -187,18 +230,19 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" id="editTaskForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Título</label>
-                        <input type="text" class="form-control" id="editTitle" required>
+                        <input type="text" class="form-control" id="editTitle" name="title">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea class="form-control" id="editDescription" rows="3"></textarea>
+                        <textarea class="form-control" id="editDescription" name="description"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Estado</label>
-                        <select class="form-select" id="editStatus">
+                        <select class="form-select" id="editStatus" name="status">
                             <option value="pendiente">Pendiente</option>
                             <option value="en_progreso">En Progreso</option>
                             <option value="completado">Completado</option>
@@ -220,5 +264,28 @@
         console.log('Editar tarea:', taskId);
         // TODO: Implementar la carga de datos de la tarea
     }
+</script>
+
+<script>
+
+    const editModal = document.getElementById('editTaskModal')
+
+    editModal.addEventListener('show.bs.modal', function (event) {
+
+        const button = event.relatedTarget
+
+        const id = button.getAttribute('data-id')
+        const title = button.getAttribute('data-title')
+        const description = button.getAttribute('data-description')
+        const status = button.getAttribute('data-status')
+
+        document.getElementById("editTitle").value = title
+        document.getElementById("editDescription").value = description
+        document.getElementById("editStatus").value = status
+
+        document.getElementById("editTaskForm").action = "/tasks/" + id + "/update"
+
+    })
+
 </script>
 {% endblock %}

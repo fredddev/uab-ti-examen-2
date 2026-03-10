@@ -9,10 +9,32 @@ tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 @tasks_bp.route('/')
 @login_required
 def list_tasks():
-    """Lista todas las tareas del usuario en el dashboard."""
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    """Lista tareas con filtros opcionales"""
+
+    status_filter = request.args.get('status')
+    category_filter = request.args.get('category')
+
+    query = Task.query.filter_by(user_id=current_user.id)
+
+    # filtro por estado
+    if status_filter and status_filter != 'todos':
+        query = query.filter(Task.status == status_filter)
+
+    # filtro por categoría
+    if category_filter and category_filter != 'todas':
+        query = query.filter(Task.category_id == category_filter)
+
+    tasks = query.all()
+
     categories = Category.query.all()
-    return render_template('dashboard.html', tasks=tasks, categories=categories)
+
+    return render_template(
+        'dashboard.html',
+        tasks=tasks,
+        categories=categories,
+        status_filter=status_filter,
+        category_filter=category_filter
+    )
 
 
 @tasks_bp.route('/<int:task_id>')
@@ -109,3 +131,51 @@ def delete_task(task_id):
         print(f'Error: {str(e)}')
     
     return redirect(url_for('tasks.list_tasks'))
+
+from flask import send_file
+import openpyxl
+from io import BytesIO
+
+@tasks_bp.route('/export')
+@login_required
+def export_tasks():
+
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+
+    # Crear archivo Excel
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "Tareas"
+
+    # Encabezados
+    sheet.append([
+        "Title",
+        "Description",
+        "Status",
+        "Category",
+        "User"
+    ])
+
+    # Datos
+    for task in tasks:
+        category_name = task.category.name if task.category else "Sin categoría"
+
+        sheet.append([
+            task.title,
+            task.description,
+            task.status,
+            category_name,
+            current_user.username
+        ])
+
+    # Guardar en memoria
+    file_stream = BytesIO()
+    workbook.save(file_stream)
+    file_stream.seek(0)
+
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name="tareas.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
