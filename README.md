@@ -156,12 +156,32 @@ project/
 
 ---
 
-## 💾 Cambiar la Contraseña de los Usuarios de Prueba
+## � Cambiar el Rol de un Usuario a Admin
 
-Si quieres cambiar las contraseñas, abre PowerShell en la carpeta del proyecto:
+Para convertir cualquier usuario registrado en administrador, abre PowerShell en la carpeta del proyecto y ejecuta:
 
 ```bash
 python manage_roles.py set <usuario> admin
+```
+
+**Ejemplo:**
+```bash
+python manage_roles.py set juan admin
+```
+
+También puedes usar el atajo:
+```bash
+python manage_roles.py make-admin <usuario>
+```
+
+Para revertirlo a usuario normal:
+```bash
+python manage_roles.py set <usuario> user
+```
+
+Para ver todos los usuarios y sus roles actuales:
+```bash
+python manage_roles.py list
 ```
 
 ---
@@ -187,6 +207,19 @@ python manage_roles.py set <usuario> admin
 ---
 
 **¡Listo! Ahora puedes gestionar tus tareas. Disfruta la app! 🎉**
+
+---
+
+## 📚 Lo que aprendieron los alumnos
+
+### Freddy
+Aprendí Python en general, es la primera vez que lo uso y tuve la oportunidad de poner en práctica mis prompts.
+
+### Angel
+Bueno, sinceramente en este trabajo aprendí varias cosas, aunque al principio me costó bastante entender algunas partes, tuve dificultades, no sabía si tenía que hacer merge de todas las ramas o solo de la última, y eso me confundía un poco. 😅😅 Al final todo salió bien. Admito que al principio fue complicado, este trabajo me ayudó a entender mejor cómo se desarrolla una aplicación web paso a paso y cómo resolver problemas cuando aparecen errores en el código.
+
+### Luis Fernando
+Este proyecto fue una experiencia muy enriquecedora. Aprendí cómo estructurar una aplicación Flask usando blueprints para mantener el código organizado y escalable. También me familiaricé con Flask-Login para gestionar la autenticación de usuarios y con Flask-Migrate para manejar los cambios en la base de datos de forma controlada. Trabajar en equipo con Git me enseñó la importancia de coordinar las ramas y hacer commits claros para evitar conflictos. Sin duda, es un proyecto que me dejó bases sólidas para futuros desarrollos web.
 
 🏷️ Módulo Categorías
 
