@@ -114,3 +114,29 @@ def admin_panel():
         regular_users=regular_users,
         users_list=users_list
     )
+
+
+@auth_bp.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@require_admin
+def delete_user(user_id):
+    """Elimina un usuario. Solo accesible para administradores."""
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        flash('No puedes eliminarte a ti mismo.', 'danger')
+        return redirect(url_for('auth.admin_panel'))
+
+    if user.role == 'admin':
+        flash('No puedes eliminar a otro administrador.', 'danger')
+        return redirect(url_for('auth.admin_panel'))
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'Usuario "{user.username}" eliminado correctamente.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error al eliminar el usuario.', 'danger')
+        print(f'Error al eliminar usuario: {str(e)}')
+
+    return redirect(url_for('auth.admin_panel'))
