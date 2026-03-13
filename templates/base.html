@@ -117,5 +117,225 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+
+    <!-- ========== FLOATING CHAT WIDGET ========== -->
+    <style>
+        #chat-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c63ff, #48b1e6);
+            border: none;
+            box-shadow: 0 4px 16px rgba(108,99,255,.45);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+            transition: transform .2s;
+        }
+        #chat-fab:hover { transform: scale(1.08); }
+        #chat-fab svg { width: 26px; height: 26px; fill: #fff; }
+
+        #chat-widget {
+            position: fixed;
+            bottom: 96px;
+            right: 28px;
+            width: 360px;
+            height: 500px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+            display: none;
+            flex-direction: column;
+            z-index: 1049;
+            overflow: hidden;
+        }
+        #chat-widget.open { display: flex; }
+
+        .cw-header {
+            background: linear-gradient(135deg, #6c63ff, #48b1e6);
+            color: #fff;
+            padding: .85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            flex-shrink: 0;
+        }
+        .cw-header .cw-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(255,255,255,.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .cw-header .cw-title { font-size: .95rem; font-weight: 600; line-height: 1.2; }
+        .cw-header .cw-sub   { font-size: .7rem; opacity: .85; }
+        .cw-header .cw-close {
+            margin-left: auto;
+            background: none; border: none; color: #fff;
+            font-size: 1.2rem; cursor: pointer; line-height: 1;
+            opacity: .8;
+        }
+        .cw-header .cw-close:hover { opacity: 1; }
+
+        .cw-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: .9rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+        }
+        .cw-msg {
+            max-width: 82%;
+            padding: .55rem .85rem;
+            border-radius: 14px;
+            font-size: .88rem;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .cw-msg.user     { align-self: flex-end; background: #6c63ff; color: #fff; border-bottom-right-radius: 4px; }
+        .cw-msg.bot      { align-self: flex-start; background: #f0f2f5; color: #1a1a2e; border-bottom-left-radius: 4px; }
+        .cw-msg.error    { align-self: center; background: #ffe5e5; color: #c0392b; font-size: .8rem; max-width: 92%; border-radius: 10px; }
+        .cw-msg.typing   { align-self: flex-start; background: #f0f2f5; color: #888; font-style: italic; font-size: .82rem; }
+
+        .cw-input-area {
+            border-top: 1px solid #e5e7eb;
+            padding: .65rem .85rem;
+            display: flex;
+            gap: .55rem;
+            flex-shrink: 0;
+        }
+        #cw-input {
+            flex: 1;
+            border: 1.5px solid #d1d5db;
+            border-radius: 20px;
+            padding: .5rem .9rem;
+            font-size: .88rem;
+            outline: none;
+            resize: none;
+            height: 40px;
+            transition: border-color .2s;
+        }
+        #cw-input:focus { border-color: #6c63ff; }
+        #cw-send {
+            background: #6c63ff; color: #fff;
+            border: none; border-radius: 20px;
+            padding: 0 1rem; font-size: .88rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: background .2s;
+        }
+        #cw-send:hover { background: #5a52e0; }
+        #cw-send:disabled { background: #b5b1ef; cursor: not-allowed; }
+
+        .cw-messages::-webkit-scrollbar { width: 5px; }
+        .cw-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    </style>
+
+    <!-- FAB button -->
+    <button id="chat-fab" title="Abrir chat IA" aria-label="Abrir chat">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/>
+        </svg>
+    </button>
+
+    <!-- Chat window -->
+    <div id="chat-widget" role="dialog" aria-label="Chat asistente IA">
+        <div class="cw-header">
+            <div class="cw-avatar">🤖</div>
+            <div>
+                <div class="cw-title">Asistente IA</div>
+                <div class="cw-sub">Groq · LLaMA 3.3 70B</div>
+            </div>
+            <button class="cw-close" id="cw-close-btn" aria-label="Cerrar chat">✕</button>
+        </div>
+        <div class="cw-messages" id="cw-messages">
+            <div class="cw-msg bot">¡Hola! 👋 Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?</div>
+        </div>
+        <div class="cw-input-area">
+            <textarea id="cw-input" placeholder="Escribe un mensaje..." rows="1"></textarea>
+            <button id="cw-send">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        const fab      = document.getElementById('chat-fab');
+        const widget   = document.getElementById('chat-widget');
+        const closeBtn = document.getElementById('cw-close-btn');
+        const msgsEl   = document.getElementById('cw-messages');
+        const inputEl  = document.getElementById('cw-input');
+        const sendBtn  = document.getElementById('cw-send');
+
+        const history = [];
+
+        fab.addEventListener('click', () => {
+            widget.classList.add('open');
+            inputEl.focus();
+        });
+        closeBtn.addEventListener('click', () => widget.classList.remove('open'));
+
+        function scrollBottom() { msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+        function addMsg(text, role) {
+            const d = document.createElement('div');
+            d.className = 'cw-msg ' + role;
+            d.textContent = text;
+            msgsEl.appendChild(d);
+            scrollBottom();
+            return d;
+        }
+
+        async function send() {
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            addMsg(text, 'user');
+            history.push({ role: 'user', content: text });
+            inputEl.value = '';
+            inputEl.style.height = '40px';
+            sendBtn.disabled = true;
+
+            const typing = addMsg('Escribiendo…', 'typing');
+
+            try {
+                const res  = await fetch('/chatbot/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, history: history.slice(0, -1) })
+                });
+                const data = await res.json();
+                typing.remove();
+
+                if (!res.ok || data.error) {
+                    addMsg('❌ ' + (data.error || 'Error desconocido.'), 'error');
+                } else {
+                    addMsg(data.reply, 'bot');
+                    history.push({ role: 'assistant', content: data.reply });
+                }
+            } catch {
+                typing.remove();
+                addMsg('❌ No se pudo conectar con el servidor.', 'error');
+            }
+
+            sendBtn.disabled = false;
+            inputEl.focus();
+        }
+
+        sendBtn.addEventListener('click', send);
+        inputEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+        });
+        inputEl.addEventListener('input', () => {
+            inputEl.style.height = '40px';
+            inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+        });
+    })();
+    </script>
+    <!-- ========== END CHAT WIDGET ========== -->
 </body>
 </html>
