@@ -123,6 +123,21 @@ La aplicación viene con 2 usuarios de prueba listos para usar:
 | `http://localhost:5001/auth/admin` | Panel de administración (solo admin) |
 | `http://localhost:5001/tasks` | Mis tareas |
 | `http://localhost:5001/profile` | Mi perfil |
+| `http://localhost:5001/chatbot/` | Chat con IA |
+
+---
+
+## 🤖 Chatbot con IA — Consulta de Tareas
+
+El chatbot está conectado a tus tareas en la base de datos. Puedes preguntarle directamente sobre tu estado de trabajo:
+
+### Preguntas de ejemplo:
+
+- **"¿Qué tareas tengo pendientes?"** → Lista todas las tareas con estado `pendiente`
+- **"¿Cuántas tareas hay registradas?"** → Muestra el total de tareas del usuario
+- **"¿Cuántas tareas completé?"** → Informa el número de tareas con estado `completado`
+
+> El chatbot detecta automáticamente cuando la pregunta está relacionada con tareas y consulta la base de datos en tiempo real antes de responder.
 
 ---
 
