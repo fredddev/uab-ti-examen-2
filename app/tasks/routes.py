@@ -13,7 +13,7 @@ def list_tasks():
     categories = Category.query.all()
 
     return render_template(
-        "dashboard.html",
+        "tasks_list.html",
         tasks=tasks,
         categories=categories
     )

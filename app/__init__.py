@@ -71,6 +71,7 @@ def register_blueprints(app):
     from app.tasks import tasks_bp
     from app.categories import categories_bp
     from app.chatbot import chatbot_bp
+    from app.dashboard import dashboard_bp
     from flask import redirect, url_for
     from flask_login import current_user, login_required
     
@@ -79,13 +80,14 @@ def register_blueprints(app):
     app.register_blueprint(tasks_bp)
     app.register_blueprint(categories_bp)
     app.register_blueprint(chatbot_bp)
+    app.register_blueprint(dashboard_bp)
     
     # Ruta raíz que redirige al login o al dashboard
     @app.route('/')
     def index():
         """Ruta raíz que redirige al login si no está autenticado, o al dashboard si lo está."""
         if current_user.is_authenticated:
-            return redirect(url_for('tasks.list_tasks'))
+            return redirect(url_for('dashboard.dashboard'))
         return redirect(url_for('auth.login'))
     
     # Ruta dashboard protegida
@@ -97,4 +99,4 @@ def register_blueprints(app):
         Requiere autenticación via @login_required decorator.
         Redirige automáticamente al login si el usuario no está autenticado.
         """
-        return redirect(url_for('tasks.list_tasks'))
+        return redirect(url_for('dashboard.dashboard'))

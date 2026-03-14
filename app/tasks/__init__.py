@@ -26,10 +26,10 @@ def list_tasks():
 
     tasks = query.all()
 
-    categories = Category.query.all()
+    categories = Category.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
-        'dashboard.html',
+        'tasks_list.html',
         tasks=tasks,
         categories=categories,
         status_filter=status_filter,
