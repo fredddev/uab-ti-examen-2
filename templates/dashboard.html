@@ -1,6 +1,38 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Mis Tareas{% endblock %}
+
+
+{% block head %}
+<style>
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin: 0 auto;
+}
+.insights-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+.insights-card .card-body h5 {
+    color: rgba(255, 255, 255, 0.9);
+}
+.chart-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.chart-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: #6c757d;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -9,54 +41,124 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="mb-2">📋 Mis Tareas</h1>
-                    <p class="text-muted">Bienvenido, <strong>{{ current_user.username }}</strong></p>
+                    <h1 class="mb-2">Resumen Gráfico</h1>
                 </div>
                 <div>
                     <a href="{{ url_for('tasks.export_tasks') }}" class="btn btn-success me-2">
                         Exportar Excel
                     </a>
-
+                    <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-outline-primary me-2">
+                        📋 Ver Tareas
+                    </a>
                     <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createTaskModal">
                         + Nueva Tarea
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- Estadísticas -->
+    <!-- Insights Inteligentes -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
+        <div class="col-12">
+            <div class="card insights-card shadow-lg">
                 <div class="card-body">
-                    <h5 class="card-title text-muted">Total</h5>
-                    <h2 class="text-primary">{{ tasks|length }}</h2>
+                    <h5 class="card-title">🤖 Análisis Inteligente</h5>
+                    <p class="card-text">{{ insights.summary }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
+    </div>
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <!-- Evolución de Productividad -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow chart-card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📈 Evolución de Productividad (Últimos 7 días)</h5>
+                    <small class="text-muted">Creadas vs Completadas</small>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-muted">Pendientes</h5>
-                    <h2 class="text-warning">{{ tasks|selectattr('status', 'equalto', 'pendiente')|list|length }}</h2>
+                    <div class="chart-container" id="productivityContainer" style="display: none;">
+                        <canvas id="productivityChart"></canvas>
+                    </div>
+                    <div class="loading-spinner" id="productivityLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
+
+        <!-- Distribución por Estado -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow chart-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">📊 Estado de Tareas</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-muted">En Progreso</h5>
-                    <h2 class="text-info">{{ tasks|selectattr('status', 'equalto', 'en_progreso')|list|length }}</h2>
+                    <div class="chart-container" id="statusContainer" style="display: none;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="loading-spinner" id="statusLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center shadow-sm">
+    </div>
+
+    <!-- Distribución por Categoría -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow chart-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">🏷️ Distribución por Categoría</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-muted">Completadas</h5>
-                    <h2 class="text-success">{{ tasks|selectattr('status', 'equalto', 'completado')|list|length }}</h2>
+                    <div class="chart-container" id="categoryContainer" style="display: none;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="loading-spinner" id="categoryLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas Recientes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">🕒 Tareas Recientes</h5>
+                </div>
+                <div class="card-body">
+                    {% if tasks %}
+                        {% for task in tasks[:5] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>{{ task.title }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    {% if task.category %}
+                                        <span class="badge bg-secondary">{{ task.category.name }}</span>
+                                    {% endif %}
+                                    {{ task.created_at.strftime('%d/%m/%Y') }}
+                                </small>
+                            </div>
+                            <span class="badge {% if task.status == 'completado' %}bg-success{% elif task.status == 'en_progreso' %}bg-info{% else %}bg-warning{% endif %}">
+                                {{ task.status }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No tienes tareas recientes.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -73,190 +175,89 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-
-    <!-- Lista de Tareas -->
-    <div class="card shadow">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">Tus Tareas</h5>
-            <form method="GET" class="row g-2">
-
-                <div class="col-md-4">
-                    <select class="form-select" name="status">
-                        <option value="todos">Todos los estados</option>
-                        <option value="pendiente">Pendiente. </option>
-                        <option value="en_progreso">En progreso.</option>
-                        <option value="completado">Completado.</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <select class="form-select" name="category">
-                        <option value="todas">Todas las categorías</option>
-                        {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">
-                        Filtrar
-                    </button>
-                </div>
-
-            </form>
-        </div>
-        <div class="card-body">
-            {% if tasks %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Tarea</th>
-                            <th>Descripción</th>
-                            <th>Categoría</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in tasks %}
-                        <tr>
-                            <td>
-                                <strong>{{ task.title }}</strong>
-                            </td>
-                            <td>
-                                <span class="text-muted">{{ task.description[:50] }}{% if task.description|length > 50
-                                    %}...{% endif %}</span>
-                            </td>
-                            <td>
-                                {% if task.category %}
-                                <span class="badge bg-secondary">{{ task.category.name }}</span>
-                                {% else %}
-                                <span class="badge bg-light text-dark">Sin categoría</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if task.status == 'completado' %}
-                                <span class="badge bg-success">✓ Completada</span>
-                                {% elif task.status == 'en_progreso' %}
-                                <span class="badge bg-info">⚙️ En Progreso</span>
-                                {% else %}
-                                <span class="badge bg-warning">⏳ Pendiente</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editTaskModal" data-id="{{ task.id }}"
-                                    data-title="{{ task.title }}" data-description="{{ task.description }}"
-                                    data-status="{{ task.status }}">
-                                    Editar
-                                </button>
-                                <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}"
-                                    style="display:inline;">
-
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('¿Estás seguro de eliminar esta tarea?')">
-                                        Eliminar
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <h5 class="text-muted">📭 No tienes tareas aún</h5>
-                <p class="text-muted mb-3">Crea tu primera tarea para comenzar a organizar tu trabajo</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                    + Crear tu primera tarea
-                </button>
-            </div>
-            {% endif %}
-        </div>
-    </div>
 </div>
 
-<!-- Modal para crear tarea -->
-<div class="modal fade" id="createTaskModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nueva Tarea</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="{{ url_for('tasks.create_task') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Título <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="title" required
-                            placeholder="Ingresa el título de la tarea">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea class="form-control" name="description" rows="3"
-                            placeholder="Describe tu tarea (opcional)"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Categoría</label>
-                        <select class="form-select" name="category_id">
-                            <option value="">- Sin categoría -</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Crear Tarea</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<script>
+    // Datos de los gráficos
+    const productivityData = JSON.parse('{{ productivity_data|safe }}');
+    const categoryData = JSON.parse('{{ category_data|safe }}');
+    const statusData = JSON.parse('{{ status_data|safe }}');
 
-<!-- Modal para editar tarea (placeholder) -->
-<div class="modal fade" id="editTaskModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Tarea</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="editTaskForm">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Título</label>
-                        <input type="text" class="form-control" id="editTitle" name="title">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea class="form-control" id="editDescription" name="description"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" id="editStatus" name="status">
-                            <option value="pendiente">Pendiente</option>
-                            <option value="en_progreso">En Progreso</option>
-                            <option value="completado">Completado</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    // Gráfico de evolución de productividad
+    const productivityCtx = document.getElementById('productivityChart').getContext('2d');
+    new Chart(productivityCtx, {
+        type: 'line',
+        data: productivityData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    document.getElementById("productivityLoading").style.display = "none";
+    document.getElementById("productivityContainer").style.display = "block";
+
+    // Gráfico de distribución por categoría
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: categoryData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    document.getElementById("statusLoading").style.display = "none";
+    document.getElementById("statusContainer").style.display = "block";
+
+    // Gráfico de estado de tareas
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'bar',
+        data: statusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+    document.getElementById("categoryLoading").style.display = "none";
+    document.getElementById("categoryContainer").style.display = "block";
+</script>
 
 <script>
     function loadTaskData(taskId) {
@@ -266,26 +267,4 @@
     }
 </script>
 
-<script>
-
-    const editModal = document.getElementById('editTaskModal')
-
-    editModal.addEventListener('show.bs.modal', function (event) {
-
-        const button = event.relatedTarget
-
-        const id = button.getAttribute('data-id')
-        const title = button.getAttribute('data-title')
-        const description = button.getAttribute('data-description')
-        const status = button.getAttribute('data-status')
-
-        document.getElementById("editTitle").value = title
-        document.getElementById("editDescription").value = description
-        document.getElementById("editStatus").value = status
-
-        document.getElementById("editTaskForm").action = "/tasks/" + id + "/update"
-
-    })
-
-</script>
 {% endblock %}
