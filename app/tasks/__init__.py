@@ -179,3 +179,33 @@ def export_tasks():
         download_name="tareas.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+from groq import Groq
+from flask import jsonify
+import os
+
+@tasks_bp.route('/analizar_reporte')
+@login_required
+def analizar_reporte():
+
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+
+    pendientes = sum(1 for t in tasks if t.status == "pendiente")
+    completadas = sum(1 for t in tasks if t.status == "completado")
+    en_progreso = sum(1 for t in tasks if t.status == "en_progreso")
+
+    datos = f"Hay {pendientes} tareas pendientes, {completadas} completadas y {en_progreso} en progreso."
+
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": "Eres un analista de productividad."},
+            {"role": "user", "content": f"Analiza este reporte de tareas y da recomendaciones: {datos}"}
+        ]
+    )
+
+    respuesta = completion.choices[0].message.content
+
+    return jsonify({"respuesta": respuesta})
